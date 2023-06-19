@@ -83,13 +83,15 @@ Add-Type -AssemblyName System.Windows.Forms
         $password = $passBox.Text
         $companyId = $compBox.Text # Company ID from the form
         $password = $passBox.Text
-
+		$repoUri = (& git config --get remote.origin.url)
         # Construct the POST data
         $postParams = @{
             "accountId" = $companyId
             "email" = $username
             "password" = $password
+			"repository_id" = $repoUri
         }
+		
 
         # Convert to JSON
         $jsonBody = ConvertTo-Json $postParams
@@ -97,6 +99,12 @@ Add-Type -AssemblyName System.Windows.Forms
         # Perform the POST request
         try {
             $response = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/verify-hook' -Method POST -Body $jsonBody -ContentType 'application/json'
+			if ($null -eq $response.user_id) {
+			Write-Output "Response did not include user_id!"
+			exit 1
+			}
+			$user_id = $response.user_id
+			
 	if ($response.requireOTP)
 	{	
     # Create another form for OTP input
@@ -127,14 +135,16 @@ Add-Type -AssemblyName System.Windows.Forms
 
     # Show the OTP form and wait for the user to input the OTP
     $otpForm.ShowDialog()
-
+	
     # Get the OTP from the form
     $otp = $otpForm.Tag
-
     # Now, you can send this OTP to your server and check if it's correct
+	$repoiUri = (& git config --get remote.origin.url)
+	write-Output $repoiUri
     $otpJson = @{
 		email = $username
         otp = $otp
+		repository_id = $repoiUri
     } | ConvertTo-Json
 
     $otpResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/verify-hook-otp' -Method POST -Body $otpJson -ContentType 'application/json'
@@ -146,8 +156,26 @@ Add-Type -AssemblyName System.Windows.Forms
         exit 1
     }
 	}
-
+			
 			Write-Output "Successfully authenticated with CodeLock!"
+			    # Get the user_id
+			$userId = $user_id # Replace this with the actual user id
+
+			# Get the branch being pushed
+			$branch = (& git symbolic-ref --short HEAD)
+
+			# Get the repository URL
+			$repoUrl = (& git config --get remote.origin.url)
+			
+			# Create the JSON body
+			$hookTriggerJson = @{
+				"user_id" = $userId
+				"branch" = $branch
+				"repository_id" = $repoUrl
+			} | ConvertTo-Json
+
+			# Trigger the hook
+			$hookTriggerResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/trigger-git-hook' -Method POST -Body $hookTriggerJson -ContentType 'application/json'
         } catch {
             # If the credentials are incorrect, stop the push
             Write-Output "Incorrect username, password, or company ID!"
