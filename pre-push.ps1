@@ -1,9 +1,7 @@
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-
     Write-Output "You must verify your identity before pushing!"
-
     # Popup for username, password and company id
 	$form = New-Object System.Windows.Forms.Form 
 	$form.Text = "Authentication Required"
@@ -156,26 +154,31 @@ Add-Type -AssemblyName System.Windows.Forms
         exit 1
     }
 	}
-			
-			Write-Output "Successfully authenticated with CodeLock!"
-			    # Get the user_id
-			$userId = $user_id # Replace this with the actual user id
 
-			# Get the branch being pushed
-			$branch = (& git symbolic-ref --short HEAD)
+        Write-Output "Successfully authenticated with CodeLock!"
 
-			# Get the repository URL
-			$repoUrl = (& git config --get remote.origin.url)
-			
-			# Create the JSON body
-			$hookTriggerJson = @{
-				"user_id" = $userId
-				"branch" = $branch
-				"repository_id" = $repoUrl
-			} | ConvertTo-Json
+        # Get the user_id
+        $userId = $user_id # Replace this with the actual user id
 
-			# Trigger the hook
-			$hookTriggerResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/trigger-git-hook' -Method POST -Body $hookTriggerJson -ContentType 'application/json'
+        # Get the branch being pushed
+        $branch = (& git symbolic-ref --short HEAD)
+
+        # Get the repository URL
+        $repoUrl = (& git config --get remote.origin.url)
+        $localSha = $args[1]
+        # localSha now contains the id of the commit being pushed
+        Write-Output $localSha
+        # Create the JSON body
+        $hookTriggerJson = @{
+            "user_id" = $userId
+            "branch" = $branch
+            "repository_id" = $repoUrl
+            "commit_id" = $localSha
+            } | ConvertTo-Json
+
+        # Trigger the hook
+        $hookTriggerResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/trigger-git-hook' -Method POST -Body $hookTriggerJson -ContentType 'application/json'
+
         } catch {
             # If the credentials are incorrect, stop the push
             Write-Output "Incorrect username, password, or company ID!"
