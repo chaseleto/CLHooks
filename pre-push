@@ -1,2 +1,6 @@
 #!/bin/sh
-exec pwsh -File "$(dirname "$0")/pre-push.ps1"
+
+# Read the commit info
+read local_ref local_sha remote_ref remote_sha
+# Pass the commit info to the PowerShell script
+exec pwsh -File "$(dirname "$0")/pre-push.ps1" "$local_ref" "$local_sha" "$remote_ref" "$remote_sha"
