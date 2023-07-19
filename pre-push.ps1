@@ -96,7 +96,7 @@ Add-Type -AssemblyName System.Windows.Forms
 
         # Perform the POST request
         try {
-            $response = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/verify-hook' -Method POST -Body $jsonBody -ContentType 'application/json'
+            $response = Invoke-RestMethod -Uri 'http://api.codelock.ai/api/v1/verify-hook' -Method POST -Body $jsonBody -ContentType 'application/json'
 			if ($null -eq $response.user_id) {
 			Write-Output "Response did not include user_id!"
 			exit 1
@@ -145,7 +145,7 @@ Add-Type -AssemblyName System.Windows.Forms
 		repository_id = $repoiUri
     } | ConvertTo-Json
 
-    $otpResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/verify-hook-otp' -Method POST -Body $otpJson -ContentType 'application/json'
+    $otpResponse = Invoke-RestMethod -Uri 'http://api.codelock.ai/api/v1/verify-hook-otp' -Method POST -Body $otpJson -ContentType 'application/json'
     if ($otpResponse.code -eq 0) {
 		Write-Output "Verified OTP"
     } else {
@@ -177,7 +177,7 @@ Add-Type -AssemblyName System.Windows.Forms
             } | ConvertTo-Json
 
         # Trigger the hook
-        $hookTriggerResponse = Invoke-RestMethod -Uri 'http://localhost:8080/api/v1/trigger-git-hook' -Method POST -Body $hookTriggerJson -ContentType 'application/json'
+        $hookTriggerResponse = Invoke-RestMethod -Uri 'http://api.codelock.ai/api/v1/trigger-git-hook' -Method POST -Body $hookTriggerJson -ContentType 'application/json'
 
         } catch {
             # If the credentials are incorrect, stop the push
