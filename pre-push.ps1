@@ -79,7 +79,7 @@ Add-Type -AssemblyName System.Windows.Forms
     {
         $username = $userBox.Text
         $password = $passBox.Text
-        $companyId = $compBox.Text # Company ID from the form
+        $companyId = $compBox.Text
         $password = $passBox.Text
 		$repoUri = (& git config --get remote.origin.url)
         # Construct the POST data
@@ -158,7 +158,7 @@ Add-Type -AssemblyName System.Windows.Forms
         Write-Output "Successfully authenticated with CodeLock!"
 
         # Get the user_id
-        $userId = $user_id # Replace this with the actual user id
+        $userId = $user_id
 
         # Get the branch being pushed
         $branch = (& git symbolic-ref --short HEAD)
