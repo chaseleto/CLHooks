@@ -1,7 +1,6 @@
 import subprocess
 import sys
 import json
-from git import Repo
 import pkg_resources
 
 REQUIRED_PACKAGES = [
@@ -21,6 +20,8 @@ install_missing_packages()
 
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QVBoxLayout, QPushButton, QDialog, QFormLayout, QDialogButtonBox
 import requests
+from git import Repo
+
 
 
 class LoginDialog(QDialog):
